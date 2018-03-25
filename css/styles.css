@@ -33,7 +33,7 @@ a {
 a:hover, 
 a:focus {
 	color: #3397db;
-	text-decoration: none;
+	text-decoration: underline;
 }
 
 a img{
@@ -103,6 +103,12 @@ nav h1 a {
   padding: 27px;
 }
 
+
+nav h1 a:hover,
+nav h1 a:focus {
+  text-decoration: underline;
+}
+
 #breadcrumb {
   padding: 10px 40px 16px;
   list-style: none;
@@ -148,16 +154,21 @@ nav h1 a {
 
 .filter-options {
   width: 100%;
-  background-color: #3397DB;
+  background-color: #007dbb;
   align-items: center;
   display: flex;
   flex-wrap: wrap;
 }
 
+.filter-options select:hover,
+.filter-options select:focus {
+  outline: none;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.25);
+} 
+
 .filter-options h2 {
   color: white;
   font-size: 1rem;
-  font-weight: normal;
   line-height: 1;
   margin: 10px 20px;
 }
@@ -191,7 +202,6 @@ nav h1 a {
   background-color: #fff;
   font-family: Arial,sans-serif;
   margin: 15px;
-  min-height: 380px;
   padding: 0 30px 25px;
   text-align: left;
   width: 270px;
@@ -203,16 +213,15 @@ nav h1 a {
   display: block;
   margin: 20px 0;
   max-width: 100%;
-  min-height: 248px;
   min-width: 100%;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
 }
 
-#restaurants-list li h1 {
-  color: #f15800;
+#restaurants-list li h3 {
+  color: #cf4a00;
   font-family: Arial,sans-serif;
   font-size: 14pt;
-  font-weight: 200;
+  font-weight: 300;
   letter-spacing: 0;
   line-height: 1.3;
   margin: 20px 0 10px;
@@ -225,11 +234,12 @@ nav h1 a {
 }
 
 #restaurants-list li a {
-  background-color: orange;
-  border-bottom: 3px solid #eee;
+  background-color: #cf4a00;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
   color: white;
   display: inline-block;
   font-size: 10pt;
+  font-weight: bold;
   margin: 15px 0 0;
   padding: 8px 30px 10px; 
   text-align: center;
@@ -237,6 +247,13 @@ nav h1 a {
   text-transform: uppercase;
 }
 
+#restaurants-list li a:hover,
+#restaurants-list li a:focus {
+  outline: none;
+  background-color: #f19000;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.25);
+  text-decoration: underline; 
+}	
 /* ====================== Restaurant Details ====================== */
 
 .inside header {
@@ -350,6 +367,10 @@ nav h1 a {
   float: right;
 }
 
+.review-rating {
+  font-weight: bold;
+}
+
 #reviews-list li p {
   margin: 10px 15px;
 }
@@ -363,6 +384,26 @@ nav h1 a {
 }
 
 /* ====================== Responsive Breakpoints ====================== */
+
+@media screen and (max-width: 300px) {
+  #restaurants-list li {
+    min-width: 0;
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+
+  #restaurants-list li h3{
+    font-size: 10pt;
+  }
+
+  #restaurants-list p{
+    font-size: 8pt;
+  }
+
+  #restaurants-list li a{
+    padding: 5px 10px 5px;
+  }
+}
 
 @media screen and (max-width: 650px) {
   .filter-options h2 {
@@ -384,7 +425,7 @@ nav h1 a {
 
 @media screen and (min-width: 776px) {
   #restaurant-summary,
-  #reviews-deftails {
+  #reviews-details {
     width: 50%;
   }
 }

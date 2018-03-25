@@ -1,23 +1,24 @@
-const staticCacheName = 'restaurants-v1';
-const filesToCache = [
-    '/index.html',
-    '/restaurant.html',
-    '/data/restaurants.json',
-    '/js/main.js',
-    '/js/restaurant_info.js',
-    '/js/dbhelper.js',
-    '/sw.js',
-    '/css/styles.css',
-    '/img/'
-]
+const staticCacheName = 'restaurants-v1',
+    filesToCache = [
+        '/index.html',
+        '/restaurant.html',
+        '/data/restaurants.json',
+        '/js/main.js',
+        '/js/restaurant_info.js',
+        '/js/dbhelper.js',
+        '/sw.js',
+        '/css/styles.css',
+        '/img/'
+];
 
 
 self.addEventListener('install', function(event) {
     event.waitUntil(
         caches.open(staticCacheName).then(function(cache) {
-            return cache.addAll(filesToCache);
+            return cache.addAll(filesToCache); 
         })
     );
+    console.log("cached files on install");
 });
 
 self.addEventListener('activate', function(event) {
@@ -27,6 +28,7 @@ self.addEventListener('activate', function(event) {
                 cacheNames.filter(function(cacheName) {
                     return cacheName.startsWith('restaurants-') && cacheName !== staticCacheName;
                 }).map(function(cacheName) {
+                    console.log("deleted cache: ", cacheName);
                     return caches.delete(cacheName);
                 })
             );
