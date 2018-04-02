@@ -2,7 +2,6 @@ const staticCacheName = 'restaurants-v1',
     filesToCache = [
         '/index.html',
         '/restaurant.html',
-        '/data/restaurants.json',
         '/js/main.js',
         '/js/restaurant_info.js',
         '/js/dbhelper.js',
@@ -50,7 +49,10 @@ self.addEventListener('fetch', function(event) {
         caches.open(staticCacheName).then(function(cache) {
             return cache.match(event.request).then(function (response) {
                 return response || fetch(event.request).then(function(response) {
-                    cache.put(event.request, response.clone());
+                    const requestUrl = new URL(event.request.url);
+                    if (event.request.method!== "POST" && requestUrl.pathname !== "/") {
+                        cache.put(event.request, response.clone());
+                    }
                     return response;
                 });
             });
