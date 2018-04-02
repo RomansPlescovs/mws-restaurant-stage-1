@@ -16,38 +16,48 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const restaurants = JSON.parse(xhr.responseText);
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
+    fetch(DBHelper.DATABASE_URL)
+    .then(response => {
+      const status = response.status
+      if (status !== 200){
+        const error = (`Request failed. Returned status of ${status}`);
+        return callback(error, null);
       }
-    };
-    xhr.send();
+
+      return response.json().then(restaurants => {
+        callback(null, restaurants);
+      })
+    })
+    .catch(e => {
+      const error = (`Request failed with error: ${e}`);
+      callback(error, null);
+    });
   }
 
   /**
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
-    // fetch all restaurants with proper error handling.
-    DBHelper.fetchRestaurants((error, restaurants) => {
-      if (error) {
-        callback(error, null);
-      } else {
-        const restaurant = restaurants.find(r => r.id == id);
-        if (restaurant) { // Got the restaurant
-          callback(null, restaurant);
-        } else { // Restaurant does not exist in the database
-          callback('Restaurant does not exist', null);
-        }
+    fetch(`${DBHelper.DATABASE_URL}/${id}`)
+    .then(response => {
+      const status = response.status;
+      if (status === 404){
+        return callback('Restaurant does not exist', null);
       }
-    });
-  }
+
+      if (status !== 200){
+        return callback('`Request failed. Returned status of ${status}`', null);
+      }
+
+      return response.json().then(restaurant => {
+        callback(null, restaurant);
+      })
+    })
+    .catch(e => {
+      const error = (`Request failed with error: ${e}`);
+      callback(error, null);     
+    })
+  }  
 
   /**
    * Fetch restaurants by a cuisine type with proper error handling.
