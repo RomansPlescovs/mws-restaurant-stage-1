@@ -12,27 +12,75 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
+  static get DB_NAME() {
+    return 'mws-rr';
+  }
+
+  static get OBJECT_STORE_NAME() {
+    return 'restaurants';
+  }
+
+  static get DB_VER() {
+    return 1;
+  }
+
+  static getDb() {
+    return idb.open(DBHelper.DB_NAME, DBHelper.DB_VER, upgradeDb => {
+      const objectStore = upgradeDb.createObjectStore(DBHelper.OBJECT_STORE_NAME, {
+        keyPath: 'id'
+      });
+
+      objectStore.createIndex('by-id', 'id');
+    });
+  }
+
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    fetch(DBHelper.DATABASE_URL)
-    .then(response => {
-      const status = response.status
-      if (status !== 200){
-        const error = (`Request failed. Returned status of ${status}`);
-        return callback(error, null);
-      }
+    DBHelper.getDb()
+    .then(db => {
+      if (!db) return;
 
-      return response.json().then(restaurants => {
-        callback(null, restaurants);
-      })
+      return db
+        .transaction(DBHelper.OBJECT_STORE_NAME)
+        .objectStore(DBHelper.OBJECT_STORE_NAME)
+        .getAll();
     })
-    .catch(e => {
-      const error = (`Request failed with error: ${e}`);
-      callback(error, null);
+    .then(restaurants => {
+      if (restaurants && restaurants.length > 0) {
+        return callback(null, restaurants);
+      } else {
+        fetch(DBHelper.DATABASE_URL)
+        .then(response => {
+          const status = response.status
+          if (status !== 200){
+            const error = (`Request failed. Returned status of ${status}`);
+            return callback(error, null);
+          }
+
+          return response.json().then(restaurants => {
+            DBHelper.getDb().then(db => {
+              if (!db) return;
+
+              const store = db
+                .transaction(DBHelper.OBJECT_STORE_NAME, 'readwrite')
+                .objectStore(DBHelper.OBJECT_STORE_NAME);
+
+              restaurants.map(r => store.put(r));
+            });
+            callback(null, restaurants);
+          })
+        })
+        .catch(e => {
+          const error = (`Request failed with error: ${e}`);
+          callback(error, null);
+            
+        });
+      }
     });
   }
+
 
   /**
    * Fetch a restaurant by its ID.
@@ -159,7 +207,7 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return restaurant.photograph ? `/img/${restaurant.photograph}.jpg` : `/img/no_image_available.svg`;
+    return restaurant.photograph ? `/img/${restaurant.photograph}.webp` : `/img/no_image_available.svg`;
   }
 
   /**

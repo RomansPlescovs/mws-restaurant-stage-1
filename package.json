@@ -31,9 +31,12 @@
     "gulp-babel": "^7.0.1",
     "gulp-concat": "^2.6.1",
     "gulp-eslint": "^4.0.2",
+    "gulp-gzip": "^1.4.2",
     "gulp-sass": "^3.2.1",
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^3.0.0",
-    "idb": "^2.1.1"
+    "gulp-webp": "^3.0.0",
+    "idb": "^2.1.1",
+    "uglify-es": "^3.3.9"
   }
 }
