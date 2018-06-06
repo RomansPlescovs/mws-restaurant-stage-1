@@ -26,6 +26,7 @@
   "dependencies": {
     "babel-core": "^6.26.0",
     "browser-sync": "^2.23.6",
+    "connect-gzip-static": "^2.1.1",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^5.0.0",
     "gulp-babel": "^7.0.1",
@@ -37,6 +38,7 @@
     "gulp-uglify": "^3.0.0",
     "gulp-webp": "^3.0.0",
     "idb": "^2.1.1",
+    "lozad": "^1.4.0",
     "uglify-es": "^3.3.9"
   }
 }

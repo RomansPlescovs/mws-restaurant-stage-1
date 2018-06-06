@@ -10,13 +10,19 @@ const sourcemaps = require('gulp-sourcemaps');
 const webp = require('gulp-webp');
 const gzip = require('gulp-gzip');
 const bs = require('browser-sync').create();
+const gzipStatic = require("connect-gzip-static")("./dist")
 
 
-gulp.task('browser-sync', function() {
+gulp.task('server', function() {
     bs.init({
         server: {
             baseDir: "./dist"
         }
+    },
+    function (err, bs) {
+        bs.addMiddleware("*", gzipStatic, {
+            override: true
+        });
     });
 });
 
@@ -28,12 +34,14 @@ gulp.task('styles', function() {
 		.pipe(autoprefixer({
 			browsers: ['last 2 versions']
         }))
+        .pipe(gzip())
 		.pipe(gulp.dest('dist/css'))
 		.pipe(bs.stream());
 });
 
 gulp.task('copy-html', function() {
     gulp.src('./*.html')
+        .pipe(gzip())
 		.pipe(gulp.dest('./dist'));
 });
 
@@ -49,6 +57,7 @@ gulp.task('scripts', function() {
         .pipe(babel())
         .pipe(concat('all.js'))
         .pipe(sourcemaps.write())
+        .pipe(gzip())
 		.pipe(gulp.dest('dist/js'));
 });
 
@@ -59,7 +68,7 @@ gulp.task('copy-manifest', function() {
 
 
 gulp.task('restaurant-list-dist', function() {
-    gulp.src(['js/dbhelper.js', 'js/main.js', 'js/sw_register.js', 'js/idb.js'])
+    gulp.src(['js/dbhelper.js', 'js/main.js', 'js/sw_register.js', 'js/idb.js', 'js/lozad.js'])
         .pipe(sourcemaps.init())
         .pipe(babel())
 		.pipe(concat('restaurant_list.js'))
@@ -67,11 +76,12 @@ gulp.task('restaurant-list-dist', function() {
             console.log(e);
          }))
         .pipe(sourcemaps.write('.'))
+        .pipe(gzip())
 		.pipe(gulp.dest('dist/js'));
 });
 
 gulp.task('restaurant-details-dist', function() {
-    gulp.src(['js/dbhelper.js', 'js/restaurant_info.js', 'js/sw_register.js', 'js/idb.js'])
+    gulp.src(['js/dbhelper.js', 'js/restaurant_info.js', 'js/sw_register.js', 'js/idb.js','js/lozad.js'])
         .pipe(sourcemaps.init())
         .pipe(babel())
 		.pipe(concat('restaurant_details.js'))
@@ -79,6 +89,7 @@ gulp.task('restaurant-details-dist', function() {
             console.log(e);
          }))
         .pipe(sourcemaps.write('.'))
+        .pipe(gzip())
 		.pipe(gulp.dest('dist/js'));
 });
 
@@ -90,8 +101,8 @@ gulp.task('sw-dist', function() {
       .pipe(gulp.dest('dist'));
   });
 
-gulp.task('default', ['copy-html', 'copy-images', 'copy-manifest','restaurant-list-dist','restaurant-details-dist',
-'sw-dist','browser-sync', 'styles'], function () {
+gulp.task('build', ['copy-html', 'copy-images', 'copy-manifest','restaurant-list-dist','restaurant-details-dist',
+'sw-dist', 'styles', 'server'], function () {
     gulp.watch('sass/*.scss', ['styles']);
 	gulp.watch('*.html', ['copy-html']);
     gulp.watch('./dist/*.html').on('change', bs.reload);

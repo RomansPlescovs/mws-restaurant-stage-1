@@ -39,7 +39,12 @@ fetchRestaurantFromURL = (callback) => {
         console.error(error);
         return;
       }
+
       fillRestaurantHTML();
+      const observer = lozad();
+      observer.observe();
+      console.log("lozad initialized");
+
       callback(null, restaurant)
     });
   }
@@ -56,10 +61,10 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   address.innerHTML = restaurant.address;
 
   const image = document.getElementById('restaurant-img');
-  image.className = 'restaurant-img';
+  image.className = 'restaurant-img lozad';
   image.alt = "An image from the restaurant " + restaurant.name;
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
-
+  image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant));
+  
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
 

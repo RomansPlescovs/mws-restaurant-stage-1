@@ -102,6 +102,10 @@ updateRestaurants = () => {
     } else {
       resetRestaurants(restaurants);
       fillRestaurantsHTML();
+      
+      const observer = lozad();
+      observer.observe();
+      console.log("lozad initialized");
     }
   })
 }
@@ -139,8 +143,8 @@ createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
 
   const image = document.createElement('img');
-  image.className = 'restaurant-img';
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.className = 'restaurant-img lozad';
+  image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant));
   image.alt = "An image from the restaurant " + restaurant.name;
   li.append(image);
 
