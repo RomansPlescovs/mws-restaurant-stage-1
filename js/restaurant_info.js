@@ -43,7 +43,6 @@ fetchRestaurantFromURL = (callback) => {
       fillRestaurantHTML();
       const observer = lozad();
       observer.observe();
-      console.log("lozad initialized");
 
       callback(null, restaurant)
     });
@@ -72,8 +71,8 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
-  // fill reviews
-  fillReviewsHTML();
+  // fetch and fill reviews
+  fetchAndFillReviews();
 }
 
 /**
@@ -99,11 +98,19 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
+fetchAndFillReviews = (reviews = self.restaurant.reviews) => {
+  if(!reviews){
+    DBHelper.fetchReviewsByRestaurantId(self.restaurant.id, (error, reviews) => {
+      self.restaurant.reviews = reviews;
+      fillReviewsHTML();  
+    })
+  } else {
+    fillReviewsHTML();
+  }
+}
+
 fillReviewsHTML = (reviews = self.restaurant.reviews) => {
   const container = document.getElementById('reviews-container');
-  const title = document.createElement('h3');
-  title.innerHTML = 'Reviews';
-  container.appendChild(title);
 
   if (!reviews) {
     const noReviews = document.createElement('p');
@@ -134,7 +141,7 @@ createReviewHTML = (review) => {
 
   const date = document.createElement('p');
   date.className = 'review-date';
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.createdAt).toLocaleDateString();
   header.appendChild(date);
 
   const rating = document.createElement('p');
@@ -147,6 +154,44 @@ createReviewHTML = (review) => {
   li.appendChild(comments);
 
   return li;
+}
+
+submitReview = () =>{
+  let name = document.getElementById('new-review-name');
+  let rating = document.getElementById('new-review-rating');
+  let comment = document.getElementById('new-review-comment');
+  let reviewRrrorMessage = document.getElementById('review-error-message');
+  let errorMessage = "";
+
+  if (!name.value)
+    errorMessage += "Please provide your name<br>";
+  if (!rating.value)
+    errorMessage += "Please provide rating<br>";
+  if (!comment.value)
+    errorMessage += "Please provide comment<br>";
+
+  if (errorMessage){
+    reviewRrrorMessage.innerHTML = errorMessage;
+    return;
+  }
+
+  review = {
+    restaurant_id: self.restaurant.id,
+    createdAt: new Date(),
+    name: name.value,
+    rating: rating.value,
+    comments: comment.value
+  };
+
+  DBHelper.createRestaurantReview(review);
+
+  name.value = '';
+  rating.value = '';
+  comment.value = '';
+
+  const ul = document.getElementById('reviews-list');
+  ul.appendChild(createReviewHTML(review));
+
 }
 
 /**

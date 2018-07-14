@@ -112,3 +112,74 @@ gulp.task('build', ['copy-html', 'copy-images', 'copy-manifest','restaurant-list
     gulp.watch(['js/dbhelper.js', 'js/restaurant_info.js', 'js/sw_register.js'], ['restaurant-details-dist']);
     gulp.watch('.dist/js/**/*.js').on('change', bs.reload);
 });
+
+
+
+
+
+gulp.task('styles-dev', function() {
+	gulp.src('sass/**/*.scss')
+		.pipe(sass())
+		.pipe(gulp.dest('dev/css'))
+		.pipe(bs.stream());
+});
+
+gulp.task('copy-html-dev', function() {
+    gulp.src('./*.html')
+		.pipe(gulp.dest('./dev'));
+});
+
+gulp.task('copy-images-dev', function() {
+    gulp.src('img/*')
+        .pipe(webp())
+		.pipe(gulp.dest('dev/img'));
+});
+
+gulp.task('scripts', function() {
+    gulp.src('js/**/*.js')
+        .pipe(concat('all.js'))
+		.pipe(gulp.dest('dev/js'));
+});
+
+gulp.task('copy-manifest-dev', function() {
+    gulp.src('manifest.json')
+        .pipe(gulp.dest('./dev'));
+});
+
+gulp.task('restaurant-list-dev', function() {
+    gulp.src(['js/dbhelper.js', 'js/main.js', 'js/sw_register.js', 'js/idb.js', 'js/lozad.js'])
+		.pipe(concat('restaurant_list.js'))
+		.pipe(gulp.dest('dev/js'));
+});
+
+gulp.task('restaurant-details-dev', function() {
+    gulp.src(['js/dbhelper.js', 'js/restaurant_info.js', 'js/sw_register.js', 'js/idb.js','js/lozad.js'])
+		.pipe(concat('restaurant_details.js'))
+		.pipe(gulp.dest('dev/js'));
+});
+
+gulp.task('sw-dev', function() {
+    gulp.src(['sw.js'])
+      .pipe(gulp.dest('dev'));
+  });
+
+gulp.task('server-dev', function() {
+    bs.init({
+        server: {
+            baseDir: "./dev"
+        }
+    });
+});
+  
+
+gulp.task('dev', ['copy-html-dev', 'copy-images-dev', 'copy-manifest-dev','restaurant-list-dev','restaurant-details-dev',
+'sw-dev', 'styles-dev', 'server-dev'], function () {
+    gulp.watch('sass/*.scss', ['styles-dev']);
+	gulp.watch('*.html', ['copy-html-dev']);
+    gulp.watch('./dev/*.html').on('change', bs.reload);
+    gulp.watch('sw.js', ['sw-dev']);
+    gulp.watch('./dev/sw.js').on('change', bs.reload);
+    gulp.watch(['js/dbhelper.js', 'js/main.js', 'js/sw_register.js'], ['restaurant-list-dev']);
+    gulp.watch(['js/dbhelper.js', 'js/restaurant_info.js', 'js/sw_register.js'], ['restaurant-details-dev']);
+    gulp.watch('.dev/js/**/*.js').on('change', bs.reload);
+});

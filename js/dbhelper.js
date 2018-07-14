@@ -9,28 +9,44 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337 // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    return `http://localhost:${port}/`;
   }
+
+  static get RESTAURANT_URL() {
+		return `${this.DATABASE_URL}restaurants/`;
+	}
+
+	static get REVIEW_URL() {
+		return `${this.DATABASE_URL}reviews/`;
+	}
 
   static get DB_NAME() {
     return 'mws-rr';
   }
 
-  static get OBJECT_STORE_NAME() {
+  static get RESTAURANT_STORE_NAME() {
     return 'restaurants';
   }
 
+  static get REVIEW_STORE_NAME() {
+    return 'reviews';
+  }
+
   static get DB_VER() {
-    return 1;
+    return 2;
   }
 
   static getDb() {
     return idb.open(DBHelper.DB_NAME, DBHelper.DB_VER, upgradeDb => {
-      const objectStore = upgradeDb.createObjectStore(DBHelper.OBJECT_STORE_NAME, {
+      const restaurantStore = upgradeDb.createObjectStore(DBHelper.RESTAURANT_STORE_NAME, {
         keyPath: 'id'
       });
+      restaurantStore.createIndex('by-id', 'id');
 
-      objectStore.createIndex('by-id', 'id');
+      const reviewStore = upgradeDb.createObjectStore(DBHelper.REVIEW_STORE_NAME, {
+        keyPath: 'id'
+      });
+      reviewStore.createIndex('by-id', 'id');
     });
   }
 
@@ -43,15 +59,15 @@ class DBHelper {
       if (!db) return;
 
       return db
-        .transaction(DBHelper.OBJECT_STORE_NAME)
-        .objectStore(DBHelper.OBJECT_STORE_NAME)
+        .transaction(DBHelper.RESTAURANT_STORE_NAME)
+        .objectStore(DBHelper.RESTAURANT_STORE_NAME)
         .getAll();
     })
     .then(restaurants => {
       if (restaurants && restaurants.length > 0) {
         return callback(null, restaurants);
       } else {
-        fetch(DBHelper.DATABASE_URL)
+        fetch(DBHelper.RESTAURANT_URL)
         .then(response => {
           const status = response.status
           if (status !== 200){
@@ -64,10 +80,11 @@ class DBHelper {
               if (!db) return;
 
               const store = db
-                .transaction(DBHelper.OBJECT_STORE_NAME, 'readwrite')
-                .objectStore(DBHelper.OBJECT_STORE_NAME);
+                .transaction(DBHelper.RESTAURANT_STORE_NAME, 'readwrite')
+                .objectStore(DBHelper.RESTAURANT_STORE_NAME);
 
-              restaurants.map(r => store.put(r));
+              restaurants.map(r => {
+                store.put(r)});
             });
             callback(null, restaurants);
           })
@@ -86,26 +103,161 @@ class DBHelper {
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
-    fetch(`${DBHelper.DATABASE_URL}/${id}`)
-    .then(response => {
-      const status = response.status;
-      if (status === 404){
-        return callback('Restaurant does not exist', null);
-      }
+    DBHelper.getDb()
+    .then(db => {
+      if (!db) return;
 
-      if (status !== 200){
-        return callback('`Request failed. Returned status of ${status}`', null);
-      }
+      return db
+        .transaction(DBHelper.RESTAURANT_STORE_NAME)
+        .objectStore(DBHelper.RESTAURANT_STORE_NAME)
+        .getAll();
+    })
+    .then(restaurants => {
+      restaurant = restaurants.find(restaurant => restaurant.id == id);
 
-      return response.json().then(restaurant => {
-        callback(null, restaurant);
+      if (restaurant){ 
+        return callback(null, restaurant);
+      } else {
+        fetch(`${DBHelper.RESTAURANT_URL}${id}`)
+        .then(response => {
+          const status = response.status;
+          if (status === 404){
+            return callback('Restaurant does not exist', null);
+          }
+
+          if (status !== 200){
+            return callback('`Request failed. Returned status of ${status}`', null);
+          }
+
+          return response.json().then(restaurant => {
+            callback(null, restaurant);
+          })
+        })
+        .catch(e => {
+          const error = (`Request failed with error: ${e}`);
+          callback(error, null);     
+        })
+      }
+    }) 
+  }
+
+  static fetchReviewsByRestaurantId(id, callback) {
+    DBHelper.getDb()
+    .then(db => {
+      if (!db) return;
+
+      return db
+        .transaction(DBHelper.REVIEW_STORE_NAME)
+        .objectStore(DBHelper.REVIEW_STORE_NAME)
+        .getAll();
+
+    })
+    .then(reviews => {
+      reviews = reviews.filter(review => review.restaurant_id === id);
+
+      if (reviews && reviews.length > 0){ 
+        return callback(null, reviews);
+      } else {
+        fetch(`${DBHelper.REVIEW_URL}?restaurant_id=${id}`)
+        .then(response => {
+          const status = response.status;
+          if (status === 404){
+            return callback('Restaurant does not exist', null);
+          }
+
+          if (status !== 200){
+            return callback('`Request failed. Returned status of ${status}`', null);
+          }
+
+          return response.json().then(reviews => {
+            DBHelper.getDb().then(db => {
+              if (!db) return;
+
+              const store = db
+                .transaction(DBHelper.REVIEW_STORE_NAME, 'readwrite')
+                .objectStore(DBHelper.REVIEW_STORE_NAME);
+
+              reviews.map(r => store.put(r));
+            });
+            callback(null, reviews);
+          })
+        })
+        .catch(e => {
+          const error = (`Request failed with error: ${e}`);
+          callback(error, null);     
+        })
+      }
+    })
+  } 
+
+  static createRestaurantReview(review){
+    if (!review) return;
+
+    fetch(`${DBHelper.REVIEW_URL}`, {
+      method: 'POST',
+      body: JSON.stringify(review)
+    })
+    .then(response =>{
+      if (response.status != 201){
+        review.syncStatus = 'Pending';
+      } else {
+        review.syncStatus = 'Success';
+      }
+      return response.json();
+    })
+    .then(review =>{
+      this.createRestaurantReviewDB(review);
+    })
+  }
+
+  static createRestaurantReviewDB(review) {
+    DBHelper.getDb().then(db => {
+      if (!db) return;
+
+        const store = db
+        .transaction(DBHelper.REVIEW_STORE_NAME, 'readwrite')
+        .objectStore(DBHelper.REVIEW_STORE_NAME);
+
+        store.put(review);
+      });
+  }
+
+  static setFavoriteRestaurant(id, isFavorite){
+    if (!id) return;
+    restaurant.is_favorite = state;
+    fetch(`${DBHelper.RESTAURANT_URL}${id}/?is_favorite=${isFavorite}`, {
+      method: 'PUT'
+    })
+    .then(response =>{
+      let syncStatus = 'Pending';
+      if (response.status == 200){
+        syncStatus = 'Success';
+      }
+      DBHelper.setFavoriteRestaurantDB(id, isFavorite, syncStatus);
+    })
+  }
+
+  static setFavoriteRestaurantDB(id, isFavorite, syncStatus){
+    DBHelper.getDb().then(db => {
+      if (!db) return;
+
+      const index = db
+      .transaction(DBHelper.RESTAURANT_STORE_NAME, 'readwrite')
+      .objectStore(DBHelper.RESTAURANT_STORE_NAME)
+      .index('by-id');
+
+      let keyRangeValue = IDBKeyRange.only(id);
+      index.openCursor(keyRangeValue)
+      .then(cursor => {
+        if (cursor){
+          let updateData = cursor.value;
+          updateData.is_favorite = isFavorite;
+          updateData.syncStatus = syncStatus;
+          cursor.update(updateData);
+        }
       })
-    })
-    .catch(e => {
-      const error = (`Request failed with error: ${e}`);
-      callback(error, null);     
-    })
-  }  
+    });
+  }
 
   /**
    * Fetch restaurants by a cuisine type with proper error handling.
