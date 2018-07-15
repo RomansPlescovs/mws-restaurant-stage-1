@@ -34,6 +34,7 @@ gulp.task('styles', function() {
 		.pipe(autoprefixer({
 			browsers: ['last 2 versions']
         }))
+        .pipe(gulp.dest('dist/css'))
         .pipe(gzip())
 		.pipe(gulp.dest('dist/css'))
 		.pipe(bs.stream());
@@ -41,6 +42,7 @@ gulp.task('styles', function() {
 
 gulp.task('copy-html', function() {
     gulp.src('./*.html')
+        .pipe(gulp.dest('./dist'))
         .pipe(gzip())
 		.pipe(gulp.dest('./dist'));
 });
@@ -57,6 +59,7 @@ gulp.task('scripts', function() {
         .pipe(babel())
         .pipe(concat('all.js'))
         .pipe(sourcemaps.write())
+        .pipe(gulp.dest('dist/js'))
         .pipe(gzip())
 		.pipe(gulp.dest('dist/js'));
 });
@@ -76,6 +79,7 @@ gulp.task('restaurant-list-dist', function() {
             console.log(e);
          }))
         .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('dist/js'))
         .pipe(gzip())
 		.pipe(gulp.dest('dist/js'));
 });
@@ -89,6 +93,7 @@ gulp.task('restaurant-details-dist', function() {
             console.log(e);
          }))
         .pipe(sourcemaps.write('.'))
+		.pipe(gulp.dest('dist/js'))
         .pipe(gzip())
 		.pipe(gulp.dest('dist/js'));
 });

@@ -35,6 +35,23 @@
       </div>
     </section>
     <section id="reviews-container">
+        <h3>Reviews</h3>
+        <ul class="comment-group">
+          <li>
+            <label aria-label="Your name for the review">Name <span class="required">*</span></label>
+            <input type="text" id="new-review-name" placeholder="Name" />
+            <label aria-label="Your rating for the restaurant">Rating <span class="required">*</span></label>
+            <input type="number" id="new-review-rating" placeholder="Rating" min="1" max="5" />
+          </li>
+          <li>
+              <label aria-label="Your review text">Review <span class="required">*</span></label>
+              <textarea id="new-review-comment"></textarea>
+          </li>
+          <li id="review-error-message"></li>
+          <li>
+              <button id="review-button" aria-label="Submit review." onclick="submitReview()">Submit Review</button>
+          </li>
+        </ul>
       <ul id="reviews-list"></ul>
     </section>
   </main>
