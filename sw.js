@@ -58,12 +58,3 @@ self.addEventListener('fetch', function(event) {
         })
     );
 });
-
-self.addEventListener('install', event => {
-    console.log("online event fired");
-    DBHelper.syncRestaurants()
-});
-
-self.addEventListener('install', event => {
-    DBHelper.syncReviews()
-});
