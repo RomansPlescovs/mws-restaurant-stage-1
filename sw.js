@@ -49,7 +49,7 @@ self.addEventListener('fetch', function(event) {
             return cache.match(event.request).then(function (response) {
                 return response || fetch(event.request).then(function(response) {
                     const requestUrl = new URL(event.request.url);
-                    if (event.request.method!== "POST" && requestUrl.pathname !== "/") {
+                    if (!["POST", "PUT"].includes(event.request.method) && requestUrl.pathname !== "/") {
                         cache.put(event.request, response.clone());
                     }
                     return response;
@@ -57,4 +57,13 @@ self.addEventListener('fetch', function(event) {
             });
         })
     );
+});
+
+self.addEventListener('install', event => {
+    console.log("online event fired");
+    DBHelper.syncRestaurants()
+});
+
+self.addEventListener('install', event => {
+    DBHelper.syncReviews()
 });

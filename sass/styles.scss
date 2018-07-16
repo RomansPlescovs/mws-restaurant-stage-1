@@ -287,7 +287,7 @@ nav h1 a:focus {
   margin: 10px;
   font-size: 30px;
   padding: 5px;
-  color: rgb(173, 173, 145);
+  color: grey;
 }
 
 #restaurants-list li span.favorite-icon:hover,
@@ -463,8 +463,11 @@ textarea{
   width: 30%;
 }
 
-.comment-group .required {
+.required {
   color:red;
+  font-size:15pt;
+  font-weight:bold;
+  
 }
 
 #review-error-message {

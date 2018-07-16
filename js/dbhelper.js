@@ -33,7 +33,7 @@ class DBHelper {
   }
 
   static get DB_VER() {
-    return 2;
+    return 1;
   }
 
   static getDb() {
@@ -42,11 +42,14 @@ class DBHelper {
         keyPath: 'id'
       });
       restaurantStore.createIndex('by-id', 'id');
+      restaurantStore.createIndex('by-syncStatus', 'syncStatus', {unique: false});
+
 
       const reviewStore = upgradeDb.createObjectStore(DBHelper.REVIEW_STORE_NAME, {
-        keyPath: 'id'
+        keyPath: 'id', autoIncrement: true 
       });
       reviewStore.createIndex('by-id', 'id');
+      reviewStore.createIndex('by-syncStatus', 'syncStatus', {unique: false});
     });
   }
 
@@ -83,8 +86,10 @@ class DBHelper {
                 .transaction(DBHelper.RESTAURANT_STORE_NAME, 'readwrite')
                 .objectStore(DBHelper.RESTAURANT_STORE_NAME);
 
-              restaurants.map(r => {
-                store.put(r)});
+              restaurants.map(restaurant => {
+                if (!restaurant.hasOwnProperty('syncStatus')) 
+                  restaurant.syncStatus = 'Success';
+                store.put(restaurant)});
             });
             callback(null, restaurants);
           })
@@ -177,7 +182,11 @@ class DBHelper {
                 .transaction(DBHelper.REVIEW_STORE_NAME, 'readwrite')
                 .objectStore(DBHelper.REVIEW_STORE_NAME);
 
-              reviews.map(r => store.put(r));
+              reviews.map(review => {
+                if (!review.hasOwnProperty('syncStatus')) 
+                  review.syncStatus = 'Success';
+                store.put(review)
+              });
             });
             callback(null, reviews);
           })
@@ -203,10 +212,11 @@ class DBHelper {
       } else {
         review.syncStatus = 'Success';
       }
-      return response.json();
-    })
-    .then(review =>{
       this.createRestaurantReviewDB(review);
+    })
+    .catch(e =>{
+      review.syncStatus = 'Pending';
+      DBHelper.createRestaurantReviewDB(review);
     })
   }
 
@@ -224,7 +234,6 @@ class DBHelper {
 
   static setFavoriteRestaurant(id, isFavorite){
     if (!id) return;
-    restaurant.is_favorite = state;
     fetch(`${DBHelper.RESTAURANT_URL}${id}/?is_favorite=${isFavorite}`, {
       method: 'PUT'
     })
@@ -234,6 +243,9 @@ class DBHelper {
         syncStatus = 'Success';
       }
       DBHelper.setFavoriteRestaurantDB(id, isFavorite, syncStatus);
+    })
+    .catch(e =>{
+      DBHelper.setFavoriteRestaurantDB(id, isFavorite, "Pending");
     })
   }
 
@@ -374,6 +386,54 @@ class DBHelper {
       animation: google.maps.Animation.DROP}
     );
     return marker;
+  }
+
+  static syncRestaurants() {
+    console.log("syncRestaurants STARTED");
+    DBHelper.getDb().then(db => {
+      if (!db) return;
+
+      const index = db
+      .transaction(DBHelper.RESTAURANT_STORE_NAME, 'readwrite')
+      .objectStore(DBHelper.RESTAURANT_STORE_NAME)
+      .index('by-syncStatus');
+
+      let keyRangeValue = IDBKeyRange.only("Pending");
+      index.openCursor(keyRangeValue)
+      .then(cursor => {
+        if (cursor){
+          let restaurant = cursor.value;
+          if (restaurant) {
+            let id = restaurant.id;
+            let is_favorite = restaurant.is_favorite;
+            DBHelper.setFavoriteRestaurant(id, is_favorite);
+          }
+        }
+      })
+    })
+  }
+  
+  static syncReviews() {
+    console.log("syncReviews STARTED");
+    DBHelper.getDb().then(db => {
+      if (!db) return;
+
+      const index = db
+      .transaction(DBHelper.REVIEW_STORE_NAME, 'readwrite')
+      .objectStore(DBHelper.REVIEW_STORE_NAME)
+      .index('by-syncStatus');
+
+      let keyRangeValue = IDBKeyRange.only("Pending");
+      index.openCursor(keyRangeValue)
+      .then(cursor => {
+        if (cursor){
+          let review = cursor.value;
+          if (review) {
+            DBHelper.createRestaurantReview(review);
+          }
+        }
+      })
+    })
   }
 
 }

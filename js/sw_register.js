@@ -9,6 +9,15 @@ if ('serviceWorker' in navigator) {
     }).catch(function(error) {
       console.log('Service worker registration failed:', error);
     });
+    
+
+    window.addEventListener('online', event => {
+      DBHelper.syncRestaurants();
+    });
+  
+    window.addEventListener('online', event => {
+      DBHelper.syncReviews();
+    });
   } else {
     console.log('Service workers are not supported.');
   }
