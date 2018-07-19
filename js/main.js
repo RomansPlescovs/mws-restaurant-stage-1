@@ -10,6 +10,10 @@ var markers = []
 document.addEventListener('DOMContentLoaded', (event) => {
   fetchNeighborhoods();
   fetchCuisines();
+  updateRestaurants();
+  if (typeof google !== 'undefined') {
+    window.initMap();
+  }
 });
 
 /**
@@ -80,7 +84,8 @@ window.initMap = () => {
     center: loc,
     scrollwheel: false
   });
-  updateRestaurants();
+  
+  addMarkersToMap();
 }
 
 /**
@@ -133,7 +138,7 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
   });
-  addMarkersToMap();
+ /* addMarkersToMap(); */
 }
 
 /**

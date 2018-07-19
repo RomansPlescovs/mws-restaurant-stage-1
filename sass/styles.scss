@@ -171,8 +171,9 @@ nav h1 a:focus {
 
 /* ====================== Map ====================== */
 
-#map {
-    height: 400px;
+#map,
+#static-map {
+  height: 400px;
   width: 100%;
   background-color: #ccc;
 }

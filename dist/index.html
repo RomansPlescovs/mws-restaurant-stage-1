@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#f3f3f3">
   <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css" media="screen">
   <link rel="manifest" href="manifest.json">
   <title>Restaurant Reviews</title>
 </head>
@@ -20,7 +20,18 @@
   <main id="maincontent" role="main">
     <a class="skip-link" href="#neighborhoods-select">Skip map</a>
     <section id="map-container">
-      <div id="map" role="application" aria-label="Google Maps"></div>
+      <div id="map" role="application" aria-label="Google Maps">
+        <picture>
+          <source media="(max-width: 200px)" srcset="img/static-map-200-400.webp">
+          <source media="(min-width: 201px) and (max-width: 400px)" srcset="img/static-map-300-400.webp">
+          <source media="(min-width: 401px) and (max-width: 550px)" srcset="img/static-map-450-400.webp">
+          <source media="(min-width: 551px) and (max-width: 750px)" srcset="img/static-map-600-400.webp">
+          <source media="(min-width: 751px) and (max-width: 942px)" srcset="img/static-map-942-400.webp">
+          <source media="(min-width: 943px) and (max-width: 1200px)" srcset="img/static-map-1200-400.webp">
+          <source media="(min-width: 1201px)" srcset="img/static-map.webp">
+          <img id="static-map" class="lozad" src="img/static-map.webp" alt="Google Map" onclick="window.initMap()">
+       </picture>
+      </div>
     </section>
     <section>
       <div class="filter-options">
@@ -35,15 +46,11 @@
       <ul id="restaurants-list"></ul>
     </section>
   </main>
-
-  <script src="js/restaurant_list.js"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_1rO3ALnTYOrQ6tzlKHgs-nFbgpFswAM&libraries=places&callback=initMap"></script>
-
-
   <footer id="footer">
     Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
   </footer>
-
+  <script src="js/restaurant_list.js"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_1rO3ALnTYOrQ6tzlKHgs-nFbgpFswAM&libraries=places"></script>
 </body>
 
 </html>

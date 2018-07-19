@@ -19,9 +19,20 @@
     </ul>
     <a class="skip-link" href="#footer">Skip map</a>
   </header>
-  <main id="maincontent" role="main">
+  <main id="maincontent" role="main"> 
     <section id="map-container">
-      <div id="map" role="application" aria-label="Google Maps"></div>
+      <div id="map" role="application" aria-label="Google Maps">
+        <picture>
+          <source media="(max-width: 200px)" srcset="img/static-map-200-400.webp">
+          <source media="(min-width: 201px) and (max-width: 400px)" srcset="img/static-map-300-400.webp">
+          <source media="(min-width: 401px) and (max-width: 550px)" srcset="img/static-map-450-400.webp">
+          <source media="(min-width: 551px) and (max-width: 750px)" srcset="img/static-map-600-400.webp">
+          <source media="(min-width: 751px) and (max-width: 942px)" srcset="img/static-map-942-400.webp">
+          <source media="(min-width: 943px) and (max-width: 1200px)" srcset="img/static-map-1200-400.webp">
+          <source media="(min-width: 1201px)" srcset="img/static-map.webp">
+          <img id="static-map" class="lozad" src="img/static-map.webp" alt="Google Map" onclick="window.initMap()">
+       </picture>
+      </div>
     </section>
     <section id="restaurant-container">
       <h2 id="restaurant-name"></h2>
@@ -59,6 +70,6 @@
     Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
   </footer>
   <script type="text/javascript" src="js/restaurant_details.js"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_1rO3ALnTYOrQ6tzlKHgs-nFbgpFswAM&libraries=places&callback=initMap"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_1rO3ALnTYOrQ6tzlKHgs-nFbgpFswAM&libraries=places"></script>
 </body>
 </html>

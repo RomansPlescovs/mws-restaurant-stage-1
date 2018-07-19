@@ -15,7 +15,14 @@ const staticCacheName = 'restaurants-v1',
         '/img/7.webp',
         '/img/8.webp',
         '/img/9.webp',
-        '/img/10.webp'
+        '/img/10.webp',
+        '/img/static-map.webp',
+        '/img/static-map-200-400.webp',
+        '/img/static-map-300-400.webp',
+        '/img/static-map-450-400.webp',
+        '/img/static-map-600-400.webp',
+        '/img/static-map-942-400.webp',
+        '/img/static-map-1200-400.webp'
 ];
 
 
